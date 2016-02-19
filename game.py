@@ -10,6 +10,23 @@ class Game(tk.Frame):
         self.canvas.pack()
         self.pack()
 
+        self.items = {}
+        self.ball = None
+        self.paddle = Paddle(self.canvas, self.width/2, 420)
+        self.items[self.paddle.item] = self.paddle
+
+        self.hud = None
+        self.setup_game()
+        self.canvas.focus_set()
+        self.canvas.bind('<Left>', lambda _: self.paddle.move(-10))
+        self.canvas.bind('<Right>', lambda _: self.paddle.move(10))
+
+    def setup_game(self):
+        self.add_ball()
+        self.update_lives_text()
+        self.text = self.draw_text(450, 200, 'Press Space to start')
+        self.canvas.bind('<space>', lambda _: self.start_game())
+
 class GameObject(object):
     def __init__(self, canvas, item):
         self.canvas = canvas
