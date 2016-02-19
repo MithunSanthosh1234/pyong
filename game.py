@@ -27,6 +27,28 @@ class Game(tk.Frame):
         self.text = self.draw_text(450, 200, 'Press Space to start')
         self.canvas.bind('<space>', lambda _: self.start_game())
 
+    def add_ball(self):
+        if self.ball is not None:
+            self.ball.delete()
+        paddle_coords = self.paddle.get_position()
+        x = (paddle_coords[0] + paddle_coords[2]) * 0.5
+        self.ball = Ball(self.canvas, x, 405)
+        self.paddle.set_ball(self.ball)
+
+    def draw_text(self, x, y, text, size='40'):
+        font = ('Arial', size)
+        return self.canvas.create_text(x, y, text=text, font=font)
+
+    def update_lives_text(self):
+        text = 'Lives: %s' % self.lives
+        if self.hud is None:
+            self.hud = self.draw_text(50, 20, text, 15)
+        else:
+            self.canvas.itemconfig(self.hud, text=text)
+
+    def start_game(self):
+        pass
+
 class GameObject(object):
     def __init__(self, canvas, item):
         self.canvas = canvas
