@@ -6,6 +6,7 @@ class Game(tk.Frame):
         self.lives = 3
         self.width = 900
         self.height = 600
+        self.paddle_collisions = 0
         self.canvas = tk.Canvas(self, bg='#ffffff', width=self.width, height=self.height)
         self.canvas.pack()
         self.pack()
@@ -18,8 +19,8 @@ class Game(tk.Frame):
         self.hud = None
         self.setup_game()
         self.canvas.focus_set()
-        self.canvas.bind('<Left>', lambda _: self.paddle.move(-10))
-        self.canvas.bind('<Right>', lambda _: self.paddle.move(10))
+        self.canvas.bind('<Left>', lambda _: self.paddle.move(-20))
+        self.canvas.bind('<Right>', lambda _: self.paddle.move(20))
 
     def setup_game(self):
         self.add_ball()
@@ -53,16 +54,29 @@ class Game(tk.Frame):
         self.game_loop()
 
     def game_loop(self):
+        self.check_collisions()
         if self.ball.get_position()[3] >= self.height:
             self.ball.speed = None
             self.lives -= 1
             if self.lives < 0:
                 self.draw_text(300, 200, 'Game over')
             else:
+                self.paddle_collisions = 0
                 self.after(1000, self.setup_game)
         else:
             self.ball.update()
             self.after(50, self.game_loop)
+
+    def check_collisions(self):
+        ball_coords = self.ball.get_position()
+        items = self.canvas.find_overlapping(*ball_coords)
+        if len(items) > 1:
+            if self.paddle_collisions > 0:
+                self.ball.direction[1] *= -1
+                x = self.ball.direction[0] * self.ball.speed
+                y = self.ball.direction[1] * self.ball.speed
+                self.ball.move(x, y)
+            self.paddle_collisions += 1
 
 class GameObject(object):
     def __init__(self, canvas, item):
