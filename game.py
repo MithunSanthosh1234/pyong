@@ -47,7 +47,22 @@ class Game(tk.Frame):
             self.canvas.itemconfig(self.hud, text=text)
 
     def start_game(self):
-        pass
+        self.canvas.unbind('<space>')
+        self.canvas.delete(self.text)
+        self.paddle.ball = None
+        self.game_loop()
+
+    def game_loop(self):
+        if self.ball.get_position()[3] >= self.height:
+            self.ball.speed = None
+            self.lives -= 1
+            if self.lives < 0:
+                self.draw_text(300, 200, 'Game over')
+            else:
+                self.after(1000, self.setup_game)
+        else:
+            self.ball.update()
+            self.after(50, self.game_loop)
 
 class GameObject(object):
     def __init__(self, canvas, item):
@@ -70,6 +85,17 @@ class Ball(GameObject):
         self.speed = 10
         item = canvas.create_oval(x-self.radius, y-self.radius, x+self.radius, y+self.radius, fill='#000000')
         super(Ball, self).__init__(canvas, item)
+
+    def update(self):
+        coords = self.get_position()
+        width = self.canvas.winfo_width()
+        if coords[0] <= 0 or coords[2] >= width:
+            self.direction[0] *= -1
+        if coords[1] <= 0:
+            self.direction[1] *= -1
+        x = self.direction[0] * self.speed
+        y = self.direction[1] * self.speed
+        self.move(x, y)
 
 class Paddle(GameObject):
     def __init__(self, canvas, x, y):
